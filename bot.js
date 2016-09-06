@@ -1,5 +1,9 @@
 var Botkit = require('botkit');
 var controller = Botkit.slackbot();
+var fs = require("fs")
+var vm = require('vm')
+vm.runInThisContext(fs.readFileSync(__dirname + "/fonctions.js"));
+
 var bot = controller.spawn({
  token: "xoxb-73332173719-vgWM9fhXfGVEq64EewfLbjHQ"
 })
@@ -8,6 +12,7 @@ bot.startRTM(function(err,bot,payload) {
    throw new Error('Could not connect to Slack');
  }
 });
+var tabCorrespondance = ["pierre","papier","ciseaux"];
 
 
 controller.hears(["keyword","^pattern$"],["direct_message","direct_mention","mention","ambient"],function(bot,message) {
@@ -50,42 +55,14 @@ controller.hears(["bonjour", "salut"],["direct_message","direct_mention","mentio
 });
 
 controller.hears(["shifumi"],["direct_message","direct_mention","mention","ambient"],function(bot,message){
-  
     bot.startConversation(message,function(err,convo) {
+        var premiereValeur = shifumi();
+        var deuxiemeValeur = shifumi();
+        var resultat = getVainqueur(premiereValeur,deuxiemeValeur);
 
         convo.say('Ok débutons le shifumi!');
-        premiereValeur = shifumi();
-        convo.say('1er joueur: ' + premiereValeur[1]);
-        deuxiemeValeur = shifumi();
-        convo.say('2eme joueur: ' + deuxiemeValeur[1]);
-        resultat = getVainqueur(premiereValeur[0],deuxiemeValeur[0]);
+        convo.say('1er joueur: ' + tabCorrespondance[premiereValeur]);
+        convo.say('2eme joueur: ' + tabCorrespondance[deuxiemeValeur]);
         convo.say(resultat);
     });
 });
-
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * 3) + 1;
-};
-function shifumi(){
-    var valeurInt = getRandomInt();
-    var valeurRetour = [];
-    if (valeurInt==1) {
-        valeurRetour[1] = "pierre";
-    }else if(valeurInt==2){
-        valeurRetour[1] = "papier";
-    }else if(valeurInt==3){
-        valeurRetour[1] = "ciseaux";
-    }
-    valeurRetour[0] = valeurInt;
-    return valeurRetour;
-};
-function getVainqueur(MainJoueurUn,MainJoueurDeux){
-    if(MainJoueurUn==(parseInt(MainJoueurDeux)+1) || MainJoueurUn==(parseInt(MainJoueurDeux)-2)) {
-        resultat = "Victoire du 1er joueur";
-    }else if(MainJoueurUn==(parseInt(MainJoueurDeux)-1) || MainJoueurUn==(parseInt(MainJoueurDeux)+2)) {
-        resultat = "Victoire du 2eme joueur";
-    }else{
-        resultat = "Egalité";
-    }
-    return resultat;
-};
